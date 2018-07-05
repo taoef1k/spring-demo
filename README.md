@@ -20,8 +20,7 @@
 - Extract zip file into separate folder
 
 ## Usage
-The system allow input in two ways.
-###### 1. It provide with an interactive command prompt based shell where commands can be typed in.
+
 > Go to extract folder
 > Run with command below
 ```shell
@@ -31,6 +30,17 @@ mvn clean install
 ```shell
 java -jar target/spring.demo-1.0.jar
 ```
+
+> Properties file
+In order to change datasource parameter, refer to this file:
+/src/main/resources/application.properties
+
+MySQL Setting:
+spring.datasource.url = jdbc:mysql://localhost:3306/spring-demo?useSSL=false
+spring.datasource.username = root
+
+Folder Upload Setting:
+upload.location=/Users/mohdtaufik/Documents/upload/
 
 > Run in browser
 ```shell
