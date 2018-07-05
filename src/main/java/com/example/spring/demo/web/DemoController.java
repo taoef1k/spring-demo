@@ -15,22 +15,22 @@ public class DemoController {
 
 	@Autowired
     CustomerService customerService;
-	
+
 	@Value("${spring.application.name}")
     String appName;
- 
+
     @GetMapping("/customer")
     public String homePage(Model model) {
         model.addAttribute("appName", ".:ATO:.");
         return "home";
     }
-    
+
     @GetMapping("/add")
     public String add(Model model) {
     	model.addAttribute("customer", new Customer());
         return "form";
     }
-    
+
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") long id, Model model) {
     	Customer customer= customerService.getCustomer(id);

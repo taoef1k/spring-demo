@@ -15,7 +15,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Autowired
     CustomerRepository customerRepository;
-	
+
 	@Override
 	public Customer save(Customer customer) {
 		if(null != customer.getId() && customer.getId().longValue() > 0) {
@@ -24,7 +24,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 			temp.setName(customer.getName());
 			temp.setBirthDate(customer.getBirthDate());
-			temp.setPhoto(customer.getPhoto());
+			if(null != customer.getPhoto() && !customer.getPhoto().isEmpty()) {
+				temp.setPhoto(customer.getPhoto());
+			}
 
 		    return customerRepository.save(temp);
 		}
@@ -35,7 +37,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public void delete(Long id) {
 		Customer customer = customerRepository.findById(id)
 	            .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", id));
-		
+
 		customerRepository.delete(customer);
 	}
 
@@ -48,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public Customer getCustomer(long id) {
 		Customer customer = customerRepository.findById(id)
 	            .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", id));
-		
+
 		return customer;
 	}
 

@@ -26,67 +26,63 @@ import com.example.spring.demo.util.CustomerUtil;
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerEndpoint {
-	
+
 	Logger log= LoggerFactory.getLogger(getClass());
 
 	@Autowired
     CustomerService customerService;
-	
+
 	@GetMapping(path="/all")
 	public List<Customer> getAllCustomer() {
 	    return customerService.getAllCustomer();
 	}
-	
+
 	@GetMapping(path="/get/{id}")
 	public Customer getCustomer(@PathVariable("id") Long id) {
 	    return customerService.getCustomer(id);
 	}
-	
+
 	// Delete customer
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
-		
+
 		Customer customer= customerService.getCustomer(id);
-		
+
 		if(CustomerUtil.deleteFile(customer.getPhoto())) {
 			customerService.delete(id);
 		}
 
 	    return ResponseEntity.ok().build();
 	}
-	
+
 	@PostMapping("/save")
 	public ResponseEntity<?> save(@ModelAttribute Customer customer) {
-		log.info("Customer {}", customer.getName());
-		log.info("Customer Birth Date {}", customer.getBirthDate());
-		log.info("Customer File {}", customer.getFile().getOriginalFilename());
-		log.info("Customer File Size {}", customer.getFile().getSize());
-		
-		if (customer.getFile().isEmpty()) {
-            return new ResponseEntity("please select a file!", HttpStatus.OK);
+
+		if (!customer.getFile().isEmpty()) {
+            //return new ResponseEntity("please select a file!", HttpStatus.OK);
+						//Save file
+						String filename= null;
+						try {
+							filename= CustomerUtil.saveFile(customer.getFile());
+						} catch (IOException e) {
+							log.error("failed upload file!");
+							e.printStackTrace();
+							return new ResponseEntity("failed upload file!", HttpStatus.OK);
+						}
+
+						customer.setPhoto(filename);
 		}
-		
-		//Save file
-		String filename= null;
-		try {
-			filename= CustomerUtil.saveFile(customer.getFile());
-		} catch (IOException e) {
-			log.error("failed upload file!");
-			e.printStackTrace();
-			return new ResponseEntity("failed upload file!", HttpStatus.OK);
-		}
-		
-		customer.setPhoto(filename);
+
 		customerService.save(customer);
 
         return new ResponseEntity("Successfully save", new HttpHeaders(), HttpStatus.OK);
 	}
-	
+
 	@GetMapping(value = "/image/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@PathVariable("id") Long id) throws IOException {
 
     	Customer customer= customerService.getCustomer(id);
-    	
+
         byte[] bytes = StreamUtils.copyToByteArray(CustomerUtil.getStreamFile(customer.getPhoto()));
 
         return ResponseEntity
