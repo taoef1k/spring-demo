@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title><span th:text="${appName}">Demo App</span></title>
+
+<link rel="stylesheet" type="text/css" media="all"
+	th:href="@{/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/css/jquery.dataTables.min.css}" />
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"
+	src="js/jquery.min.js"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"
+	src="js/bootstrap.min.js"></script>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/moment.min.js}"></script>
+<style type="text/css">
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.portrait {
+    height: 500px;
+    width: 300px;
+}
+</style>
+</head>
+<body>
+
+	<div class="container">
+
+		<h1>Customers</h1>
+        
+		<p>
+			<a class="btn btn-primary" th:href="@{/add}" role="button">Add New Customer</a>
+		</p>
+
+		<table class="table" id="tbl_customer">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Birth Date</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Birth Date</th>
+					<th>Action</th>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+
+	<div class="modal fade bd-example-modal-lg" id="profile_box"
+		tabindex="-1" role="dialog" aria-labelledby="customerModal"
+		aria-hidden="true">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div id="image_cust" class="portrait"></div>
+				<div id="name_cust"></div>
+				<div id="birthDate_cust"></div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			/* $('.alert-info').hide();
+			$('.alert-danger').hide(); */
+			
+			var table = $('#tbl_customer').DataTable({
+				"sAjaxSource" : "/api/customer/all",
+				"sAjaxDataProp" : "",
+				"aoColumns" : [
+						{
+							"mData" : "id"
+						},
+						{
+							"mData" : "name"
+						},
+						{
+							"mRender" : function(data, type, obj) {
+								return moment(obj.birthDate).format('DD MMM YYYY')
+							}
+						},
+						{
+							"mRender" : function(data, type, obj) {
+								var action = '<a class="badge badge-primary" href="javascript:void(0);" onclick="show_profile(' + obj.id + ')">'
+										+ 'View'
+										+ '</a>'
+										+ '<a class="badge badge-success" href="/edit/' + obj.id + '">'
+										+ 'Edit'
+										+ '</a>'
+										+ '<a class="badge badge-danger" href="javascript:void(0);" onclick="delete_customer(' + obj.id + ')">'
+										+ 'Delete'
+										+ '</a>';
+								return action;
+							}
+						} ]
+			});
+		});
+
+		function show_profile(id) {
+			$('#image_cust').html("<img src='/api/customer/image/" + id + "' />");
+			
+			$.ajax({
+				type : "GET",
+				url : "/api/customer/get/"+id,
+				contentType: "application/json",                
+			    dataType: 'json',
+				success : function(data) {
+					$('#name_cust').html("Name : "+ data.name);
+					$('#birthDate_cust').html("Birth Date = " + moment(data.birthDate).format('DD MMM YYYY'));
+				},
+				error: function() {
+					$('#name_cust').html("Name : No Data");
+					$('#birthDate_cust').html("Birth Date = No Data");
+				}
+			});
+
+			$('#profile_box').modal('show');
+		}
+		
+		function delete_customer(id) {
+			$.ajax({
+				type : "DELETE",
+				url : "/api/customer/delete/"+id,
+				success : function(data) {
+					$('#alert-content-info').text('Successfully Delete.');
+	    	  		$('.alert-info').show();
+	    	  		$('.alert-danger').hide();
+	    	  		$('#tbl_customer').DataTable().ajax.reload();
+				},
+				error : function() {
+	    	  		$('.alert-danger').hide();
+					$('alert-content-danger').text('Failed Delete.');
+	    	  		$('.alert-danger').show();
+				}
+			});
+		}
+	</script>
+</body>
+</html>

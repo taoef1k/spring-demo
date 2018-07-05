@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Customer Form</title>
+
+    <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}" />
+
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+    <div class="container">
+
+        <h1>Customer Form</h1>&nbsp;
+        <span class="badge badge-primary">Add process</span>
+        
+        <div class="alert alert-info" role="alert"></div>
+        <div class="alert alert-danger" role="alert"></div>
+
+		<form class="form-group" enctype="multipart/form-data" id="frm_customer" method="post">
+			<input type="hidden" th:field="${customer.id}" />
+			<div class="form-group">
+				<label for="title">Name</label> <input type="text"
+					class="form-control" id="name" th:field="${customer.name}" />
+			</div>
+			<div class="form-group">
+				<label for="title">BirthDate</label> 
+				<input class="form-control" id="birthDate" th:field="${customer.birthDate}" placeholder="dd/mm/yyyy" type="date"/>
+			</div>
+			<div class="form-group">
+				<label for="title">Upload Photo</label> <input type="file" name="file"/>
+			</div>
+			<button type="submit" id="btn-submit" class="btn btn-primary">Save</button>
+			<a th:href="@{/customer}" class="btn btn-danger" role="button">Cancel</a>
+		</form>
+
+	</div>
+
+	<script type="text/javascript">
+	   $(document).ready( function () {
+		   		   
+		   $('.alert').hide();
+		   
+		   $('#btn-submit').click(function(event) {
+
+		      event.preventDefault();
+		      
+		      //Get form
+		      var form = $('#frm_customer')[0];
+
+		      var data = new FormData(form);
+		      
+		      $("#btn-submit").prop("disabled", true);
+		      
+		      var bf_text= $(".badge-primary").text();
+		      /*var name = $('#name').val();
+		      var content = $('#content').val();
+		      var json = { "name" : name, "content" : content};*/
+		      
+		      /* Send the data using post*/
+		      $.ajax({
+	    	  	type: "POST",
+	    	  	enctype: 'multipart/form-data',
+	    	  	url: "/api/customer/save",
+	    	  	data: data,
+	    	  	processData: false,
+	            contentType: false,
+	            cache: false,
+	            timeout: 600000,
+	    	  	beforeSend: function() {
+	    	  		$(".badge-primary").text("Saving...");
+	    	  	},
+	    	  	success: function(data){
+	    	  		$('.alert-info').text('Successfully Submit.');
+	    	  		$('.alert-info').show();
+	    	  		$(".badge-primary").text(bf_text);
+	    	  	},
+	    	  	error: function(){
+	    	  		$('.alert-danger').text('Failed Submit.');
+	    	  		$('.alert-danger').show();
+	    	  		$(".badge-primary").text(bf_text);
+	    	  	}
+	    	  });
+		      
+		    });
+	   });
+    </script>
+    
+</body>
+</html>
