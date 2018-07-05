@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,6 +33,9 @@ public class CustomerEndpoint {
 	@Autowired
     CustomerService customerService;
 
+	@Value("${upload.location}")
+	String uploadPath;
+
 	@GetMapping(path="/all")
 	public List<Customer> getAllCustomer() {
 	    return customerService.getAllCustomer();
@@ -48,7 +52,7 @@ public class CustomerEndpoint {
 
 		Customer customer= customerService.getCustomer(id);
 
-		if(CustomerUtil.deleteFile(customer.getPhoto())) {
+		if(CustomerUtil.deleteFile(uploadPath, customer.getPhoto())) {
 			customerService.delete(id);
 		}
 
@@ -63,7 +67,7 @@ public class CustomerEndpoint {
 						//Save file
 						String filename= null;
 						try {
-							filename= CustomerUtil.saveFile(customer.getFile());
+							filename= CustomerUtil.saveFile(uploadPath, customer.getFile());
 						} catch (IOException e) {
 							log.error("failed upload file!");
 							e.printStackTrace();
@@ -83,7 +87,7 @@ public class CustomerEndpoint {
 
     	Customer customer= customerService.getCustomer(id);
 
-        byte[] bytes = StreamUtils.copyToByteArray(CustomerUtil.getStreamFile(customer.getPhoto()));
+        byte[] bytes = StreamUtils.copyToByteArray(CustomerUtil.getStreamFile(uploadPath, customer.getPhoto()));
 
         return ResponseEntity
                 .ok()
